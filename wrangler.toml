@@ -1,0 +1,14 @@
+name = "cf_workers_subs"
+main = "src/worker.js"
+compatibility_date = "2024-08-08"
+workers_dev = true
+
+[[rules]]
+type = "Data"
+globs = ["**/*.html","**/config.ini"]
+fallthrough = false
+
+[[d1_databases]]
+binding = "MY_D1_DATABASE"
+database_id = ""
+database_name = "subs"

@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            /* 水平居中 */
+            align-items: center;
+            /* 垂直居中 */
+            height: 100vh;
+            /* 设置body的高度为视口高度，以便垂直居中生效 */
+            margin: 0;
+            padding: 0;
+        }
+
+        .login-wrapper {
+            width: -webkit-fill-available;
+            max-width: 350px;
+        }
+
+        .login-container {
+            max-width: 300px;
+            /* 设置登录框的最大宽度 */
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+
+        .container {
+            width: -webkit-fill-available;
+            max-width: 90%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+
+
+
+
+        input[type="password"],
+        input[type="text"],
+        button {
+            display: block;
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .error-message {
+            color: red;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        .success-message {
+            color: green;
+            background-color: #d4edda;
+            /* 绿色背景 */
+            border: 1px solid #c3e6cb;
+            /* 深绿色边框 */
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+
+        /* 设置订阅列的滚动样式 */
+        .scrollable-column {
+            max-width: 200px;
+            /* 设置最大宽度 */
+            overflow-x: auto;
+            /* 启用水平滚动 */
+            white-space: nowrap;
+            /* 禁止换行 */
+        }
+
+        /* 美化电脑端的滚动条 */
+        .scrollable-column::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .scrollable-column::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .scrollable-column::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        .scrollable-column::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @media (max-width: 768px) {
+            .scrollable-column {
+                -ms-overflow-style: none;
+                /* IE and Edge */
+                scrollbar-width: none;
+                /* Firefox */
+            }
+
+            .scrollable-column::-webkit-scrollbar {
+                display: none;
+                /* Chrome, Safari, Opera */
+            }
+
+            .container,
+            .login-container {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="login-wrapper">
+        <div class="login-container">
+            <h2>欢迎登录</h2>
+            <p>请输入您的密码以登录：</p>
+            <input type="password" id="inputPassword" placeholder="密码">
+            <div class="error-message" id="errorMessage" style="display: none;"></div>
+            <button onclick="login()">登录</button>
+        </div>
+    </div>
+
+
+    <div class="container" style="display: none;">
+        <div>
+            <input type="text" id="inputData" placeholder="订阅链接">
+            <div class="success-message" id="errorMessage" style="display: none;"></div>
+
+            <button onclick="submitData()">提交</button>
+        </div>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>订阅</th>
+                    <th>删除</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- 表格数据将在这里动态添加 -->
+            </tbody>
+        </table>
+    </div>
+
+
+</body>
+<script>
+    let password = localStorage.getItem('password');
+
+    async function login() {
+        const errorMessageElement = document.getElementById('errorMessage');
+
+        if (!password) {
+            password = document.getElementById('inputPassword').value;
+        }
+
+        const payload = { password: password };
+
+        try {
+            const response = await fetch('/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                localStorage.setItem('password', password);
+                document.querySelector('.container').style.display = 'block';
+                document.querySelector('.login-wrapper').style.display = 'none';
+                document.body.style.height = 'auto';
+                getData();
+                errorMessageElement.style.display = 'none'; // 隐藏错误消息
+            } else {
+                if (localStorage.getItem('password')) {
+                    // 如果使用存储的密码登录失败，清除存储的密码并提示用户重新输入
+                    localStorage.removeItem('password');
+                    errorMessageElement.textContent = '存储的密码无效，请重新输入密码！';
+                } else {
+                    errorMessageElement.textContent = '密码错误，请重试！';
+                }
+                errorMessageElement.style.display = 'block'; // 显示错误消息
+            }
+        } catch (error) {
+            console.error('Error logging in:', error);
+            errorMessageElement.textContent = '登录时发生错误，请稍后重试。';
+            errorMessageElement.style.display = 'block'; // 显示错误消息
+        }
+    }
+
+    async function getData() {
+        try {
+            const response = await fetch('/api/get-urls', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${password}`
+                },
+                body: JSON.stringify({})
+            });
+            const data = await response.json();
+
+            const tableBody = document.querySelector('#data-table tbody');
+            tableBody.innerHTML = '';
+
+            data.forEach(item => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td style="width: 0px;">${item.date}</td>
+                    <td class="scrollable-column">${item.url}</td>
+                    <td><button onclick="deleteData('${item.url}')">删除</button></td>
+                `;
+
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error fetching data:', error);
+        }
+    }
+
+    async function submitData() {
+        const url = document.getElementById('inputData').value;
+        const successMessageElement = document.querySelector('.success-message');
+
+        // 获取当前时间并格式化为 MMDDHHmm
+        const now = new Date();
+        const formattedDate = `${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+
+        try {
+            await fetch('/api/add-url', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${password}`
+                },
+                body: JSON.stringify({ url, date: formattedDate })
+            });
+            successMessageElement.textContent = '数据已成功提交！';
+            successMessageElement.style.display = 'block'; // 显示成功消息
+
+            getData();
+        } catch (error) {
+            console.error('Error submitting data:', error);
+        }
+    }
+
+    async function deleteData(url) {
+        const successMessageElement = document.querySelector('.success-message');
+
+        try {
+            await fetch('/api/delete-url', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `${password}`
+                },
+                body: JSON.stringify({ url })
+            });
+
+            successMessageElement.textContent = '数据已成功删除！';
+            successMessageElement.style.display = 'block'; // 显示成功消息
+
+            getData();
+        } catch (error) {
+            console.error('Error deleting data:', error);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // 不加载数据，等待用户登录
+    });
+
+    login();
+
+
+</script>
+
+</html>
