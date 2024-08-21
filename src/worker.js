@@ -1,10 +1,15 @@
-import HTML from "./admin.html";
-import ConfigINI from "./config.ini";
+import HTML from "./index.html";
 
-let SECRET_PASSWORD = 'yourpassword';
+//密码
+let SECRET_PASSWORD = 'auto';
+//订阅转换地址
 let SUB_URL = 'url.v1.mk';
-let SUB_CONFIG = 'https://your.worker.dev/config.ini';
+//订阅转换的配置文件
+let SUB_CONFIG = 'https://raw.githubusercontent.com/bestruirui/ACL4SSR/master/Clash/config/ACL4SSR_Online_Full.ini';
+//订阅转换的参数
 let BASE_CONFIG = 'filename=BESTRUI&emoji=true&list=false&xudp=true&udp=true&tfo=false&expand=true&scv=false&fdn=false&new_name=true';
+//自己的worker地址
+let WORKER_URL = 'your.worker.dev'
 
 export default {
 	async fetch(request, env) {
@@ -43,12 +48,13 @@ async function handleRequest(request, env, url) {
 			return new Response(data, {
 				headers: {
 					'Content-Type': 'text/plain;charset=utf-8',
-					'Content-Disposition': 'attachment; filename="BESTRUI"; filename*=utf-8'
+					// 'Content-Disposition': 'attachment; filename="BESTRUI"; filename*=utf-8'
 				},
 			});
 
 		case '/config.ini':
-			const configData = await updateConfigINI(env, ConfigINI);
+			const config = await fetchTextData(SUB_CONFIG);
+			const configData = await updateConfig(env, config);
 			return new Response(configData, { headers: { "Content-Type": "text/plain;charset=UTF-8" } });
 
 		case '/api/get-urls':
@@ -91,7 +97,8 @@ async function getDatabaseResults(env) {
 
 function createSubscriptionUrl(urls) {
 	const encodeUrl = encodeURIComponent(urls);
-	const encodeSubConfigUrl = encodeURIComponent(SUB_CONFIG);
+	const encodeSubConfigUrl = encodeURIComponent('https://' + WORKER_URL + '/config.ini');
+	// const encodeSubConfigUrl = encodeURIComponent(SUB_CONFIG);
 	return `https://${SUB_URL}/sub?target=clash&url=${encodeUrl}&insert=false&config=${encodeSubConfigUrl}&${BASE_CONFIG}`;
 }
 
@@ -105,14 +112,10 @@ async function fetchTextData(url) {
 	return response.text();
 }
 
-async function updateConfigINI(env, configINI) {
+async function updateConfig(env, config) {
 	const { results } = await env.MY_D1_DATABASE.prepare("SELECT date FROM subs").all();
-	const decoder = new TextDecoder('utf-8');
-	let updatedString = decoder.decode(configINI);
-
 	results.forEach(result => {
-		updatedString += `\ncustom_proxy_group=${result.date}\`url-test\`!!GROUP=${result.date}\`http://www.gstatic.com/generate_204\`300,,50`;
+		config += `\ncustom_proxy_group=😵‍💫 ${result.date}\`url-test\`!!GROUP=${result.date}\`http://www.gstatic.com/generate_204\`300,,50`;
 	});
-
-	return updatedString;
+	return config;
 }
