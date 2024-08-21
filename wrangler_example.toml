@@ -1,0 +1,26 @@
+name = "cf_workers_subs"
+main = "src/worker.js"
+compatibility_date = "2024-08-08"
+workers_dev = true
+
+[[rules]]
+type = "Data"
+globs = ["**/*.html"]
+fallthrough = false
+
+[[d1_databases]]
+binding = "MY_D1_DATABASE"
+database_id = ""
+database_name = "subs"
+
+[vars]
+# 密码
+SECRET_PASSWORD = ""
+# 自己的worker地址
+WORKER_URL = ''
+# 订阅转换地址
+SUB_URL = 'url.v1.mk'
+# 订阅转换的配置文件
+SUB_CONFIG = 'https://raw.githubusercontent.com/bestruirui/ACL4SSR/master/Clash/config/ACL4SSR_Online_Full.ini'
+# 订阅转换的参数
+BASE_CONFIG = 'filename=BESTRUI&emoji=true&list=false&xudp=true&udp=true&tfo=false&expand=true&scv=false&fdn=false&new_name=true'
