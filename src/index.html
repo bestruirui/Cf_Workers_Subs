@@ -260,11 +260,12 @@
     }
 
     async function submitData() {
-        const url = document.getElementById('inputData').value;
+        const urlInputElement = document.getElementById('inputData');
+        const url = urlInputElement.value;
         const successMessageElement = document.querySelector('.success-message');
 
         const now = new Date();
-        const formattedDate = `${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}`;
+        const formattedDate = `${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
 
         try {
             await fetch('/api/add-url', {
@@ -277,6 +278,9 @@
             });
             successMessageElement.textContent = '数据已成功提交！';
             successMessageElement.style.display = 'block'; // 显示成功消息
+
+            // 清空输入框内容
+            urlInputElement.value = '';
 
             getData();
         } catch (error) {
