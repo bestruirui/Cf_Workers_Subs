@@ -5,7 +5,7 @@ workers_dev = true
 
 [[rules]]
 type = "Data"
-globs = ["**/*.html","**/config.ini"]
+globs = ["**/*.html"]
 fallthrough = false
 
 [[d1_databases]]
