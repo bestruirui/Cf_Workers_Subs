@@ -30,31 +30,31 @@ git clone --depth=1 https://github.com/bestruirui/Cf_Workers_Subs.git
 ```
 ### 5. 修改wrangler.toml
 
+将`wrangler_example.toml`重命名为`wrangler.toml`
+
 修改为对应的database_id
-```
+```toml
 [[d1_databases]]
 binding = "MY_D1_DATABASE"
 database_id = ""     # 第三步获取到的ID
 database_name = "subs"
 ```
 
-### 6. 修改worker.js
-
 将下面的地址改为你的worker地址，注意不带`https://`
 
-```js
-let WORKER_URL = 'your.worker.dev';
+```toml
+WORKER_URL = 'your.worker.dev'
 ```
 将下面的密码改为你的自定义密码
-```js
-let SECRET_PASSWORD = 'yourpassword';
+```toml
+SECRET_PASSWORD = 'yourpassword'
 ```
 可以更改为自己的配置文件
-```js
-let SUB_CONFIG = 'https://raw.githubusercontent.com/bestruirui/ACL4SSR/master/Clash/config/ACL4SSR_Online_Full.ini';
+```toml
+SUB_CONFIG = 'https://raw.githubusercontent.com/bestruirui/ACL4SSR/master/Clash/config/ACL4SSR_Online_Full.ini'
 
 ```
-### 7. 部署
+### 6. 部署
 ```bash
 npm run deploy
 ```
