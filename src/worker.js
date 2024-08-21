@@ -10,9 +10,8 @@ export default {
 async function handleRequest(request, env, url) {
 	const path = url.pathname;
 	const authHeader = request.headers.get('Authorization');
-	const SECRET_PASSWORD = env.SECRET_PASSWORD;
 
-	if (authHeader !== SECRET_PASSWORD && !['/', '/login', '/' + SECRET_PASSWORD, '/config.ini'].includes(path)) {
+	if (authHeader !== env.SECRET_PASSWORD && !['/', '/login', '/' + env.SECRET_PASSWORD, '/config.ini'].includes(path)) {
 		return new Response('Unauthorized', { status: 401 });
 	}
 
@@ -26,14 +25,14 @@ async function handleRequest(request, env, url) {
 		case '/login':
 			if (request.method === 'POST') {
 				const { password } = await request.json();
-				return jsonResponse({ success: password === SECRET_PASSWORD });
+				return jsonResponse({ success: password === env.SECRET_PASSWORD });
 			}
 			break;
 
-		case '/' + SECRET_PASSWORD:
+		case '/' + env.SECRET_PASSWORD:
 			const results = await getDatabaseResults(env);
 			const urls = results.map((item) => `tag:${item.date},${item.url}`).join('|');
-			const lastUrl = createSubscriptionUrl(urls);
+			const lastUrl = createSubscriptionUrl(env, urls);
 			const data = await fetchTextData(lastUrl);
 			return new Response(data, {
 				headers: {
@@ -43,8 +42,7 @@ async function handleRequest(request, env, url) {
 			});
 
 		case '/config.ini':
-			const SUB_CONFIG = env.SUB_CONFIG;
-			const config = await fetchTextData(SUB_CONFIG);
+			const config = await fetchTextData(env.SUB_CONFIG);
 			const configData = await updateConfig(env, config);
 			return new Response(configData, { headers: { "Content-Type": "text/plain;charset=UTF-8" } });
 
@@ -86,15 +84,10 @@ async function getDatabaseResults(env) {
 	return (await env.MY_D1_DATABASE.prepare("SELECT * FROM subs").all()).results;
 }
 
-function createSubscriptionUrl(urls) {
-	const SUB_URL = env.SUB_URL;
-	const BASE_CONFIG = env.BASE_CONFIG;
-	const WORKER_URL = env.WORKER_URL;
-
+function createSubscriptionUrl(env, urls) {
 	const encodeUrl = encodeURIComponent(urls);
-	const encodeSubConfigUrl = encodeURIComponent('https://' + WORKER_URL + '/config.ini');
-	// const encodeSubConfigUrl = encodeURIComponent(SUB_CONFIG);
-	return `https://${SUB_URL}/sub?target=clash&url=${encodeUrl}&insert=false&config=${encodeSubConfigUrl}&${BASE_CONFIG}`;
+	const encodeSubConfigUrl = encodeURIComponent('https://' + env.WORKER_URL + '/config.ini');
+	return `https://${env.SUB_URL}/sub?target=clash&url=${encodeUrl}&insert=false&config=${encodeSubConfigUrl}&${env.BASE_CONFIG}`;
 }
 
 async function fetchTextData(url) {
