@@ -1,16 +1,5 @@
 import HTML from "./index.html";
 
-//密码
-let SECRET_PASSWORD = 'auto';
-//订阅转换地址
-let SUB_URL = 'url.v1.mk';
-//订阅转换的配置文件
-let SUB_CONFIG = 'https://raw.githubusercontent.com/bestruirui/ACL4SSR/master/Clash/config/ACL4SSR_Online_Full.ini';
-//订阅转换的参数
-let BASE_CONFIG = 'filename=BESTRUI&emoji=true&list=false&xudp=true&udp=true&tfo=false&expand=true&scv=false&fdn=false&new_name=true';
-//自己的worker地址
-let WORKER_URL = 'your.worker.dev'
-
 export default {
 	async fetch(request, env) {
 		const url = new URL(request.url);
@@ -21,6 +10,7 @@ export default {
 async function handleRequest(request, env, url) {
 	const path = url.pathname;
 	const authHeader = request.headers.get('Authorization');
+	const SECRET_PASSWORD = env.SECRET_PASSWORD;
 
 	if (authHeader !== SECRET_PASSWORD && !['/', '/login', '/' + SECRET_PASSWORD, '/config.ini'].includes(path)) {
 		return new Response('Unauthorized', { status: 401 });
@@ -53,6 +43,7 @@ async function handleRequest(request, env, url) {
 			});
 
 		case '/config.ini':
+			const SUB_CONFIG = env.SUB_CONFIG;
 			const config = await fetchTextData(SUB_CONFIG);
 			const configData = await updateConfig(env, config);
 			return new Response(configData, { headers: { "Content-Type": "text/plain;charset=UTF-8" } });
@@ -96,6 +87,10 @@ async function getDatabaseResults(env) {
 }
 
 function createSubscriptionUrl(urls) {
+	const SUB_URL = env.SUB_URL;
+	const BASE_CONFIG = env.BASE_CONFIG;
+	const WORKER_URL = env.WORKER_URL;
+
 	const encodeUrl = encodeURIComponent(urls);
 	const encodeSubConfigUrl = encodeURIComponent('https://' + WORKER_URL + '/config.ini');
 	// const encodeSubConfigUrl = encodeURIComponent(SUB_CONFIG);
