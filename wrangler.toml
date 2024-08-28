@@ -10,14 +10,14 @@ fallthrough = false
 
 [[d1_databases]]
 binding = "MY_D1_DATABASE"
-database_id = ""
+database_id = "0b05f64d-ba64-43c5-a471-4f23d7af7cb2"
 database_name = "subs"
 
 [vars]
 # 密码
-SECRET_PASSWORD = ""
+SECRET_PASSWORD = "jing798882"
 # 自己的worker地址
-WORKER_URL = ''
+WORKER_URL = 'xiaozeng199999.workers.dev'
 # 订阅转换地址
 SUB_URL = 'url.v1.mk'
 # 订阅转换的配置文件
